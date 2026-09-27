@@ -4,7 +4,7 @@
 // being minted for them. The guard lives in this module so every mint and
 // bridge path can enforce it without reaching into the lib.rs facade.
 
-use soroban_sd::{address, panic_with_error, Env};
+use soroban_sdk::{panic_with_error, Address, Env};
 
 use crate::{ContractError, DataKey};
 
@@ -31,9 +31,7 @@ pub(crate) fn opt_in(e: Env, user: Address) {
 
 /// Returns `true` the user has opted out of future mints.
 pub(crate) fn is_opted_out(e: &Env, user: &Address) -> bool {
-    e.storage()
-        .persistent()
-        .has(&DataKey::OptOut(user.clone()))
+    e.storage().persistent().has(&DataKey::OptOut(user.clone()))
 }
 
 /// Panics with [ContractError::UserOptedOut] if `user` has set the opt-out
@@ -43,10 +41,7 @@ pub(crate) fn is_opted_out(e: &Env, user: &Address) -> bool {
 /// that a single opted-out item reverts the entire operation (mint batch or
 /// inbound bridge transfer).
 pub(crate) fn require_not_opted_out(e: &Env, user: &Address) {
-    if e.storage()
-        .persistent()
-        .has(&DataKey::OptOut(user.clone()))
-    {
-        panic_with_error!!(e, ContractError::UserOptedOut);
+    if e.storage().persistent().has(&DataKey::OptOut(user.clone())) {
+        panic_with_error!(e, ContractError::UserOptedOut);
     }
 }

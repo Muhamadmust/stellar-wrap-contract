@@ -147,10 +147,7 @@ pub(crate) fn get_all_wraps_for_user(e: Env, user: Address) -> soroban_sdk::Vec<
 /// - `latest_period`: the latest period with an active wrap
 pub(crate) fn get_wrap_summary(e: Env, user: Address) -> Option<WrapSummary> {
     let wrap_periods_key = DataKey::WrapPeriods(user.clone());
-    let periods: soroban_sdk::Vec<u64> = e
-        .storage()
-        .persistent()
-        .get(&wrap_periods_key)?;
+    let periods: soroban_sdk::Vec<u64> = e.storage().persistent().get(&wrap_periods_key)?;
 
     if periods.is_empty() {
         return None;
@@ -328,7 +325,10 @@ pub(crate) fn check_user_invariants(e: Env, user: Address) -> InvariantReport {
     for i in 0..scan_len {
         if let Some(p) = user_periods.get(i) {
             max_user_period = Some(core::cmp::max(max_user_period.unwrap_or(0), p));
-            if e.storage().persistent().has(&DataKey::Wrap(user.clone(), p)) {
+            if e.storage()
+                .persistent()
+                .has(&DataKey::Wrap(user.clone(), p))
+            {
                 live_wraps_found += 1;
             }
         }
@@ -339,14 +339,19 @@ pub(crate) fn check_user_invariants(e: Env, user: Address) -> InvariantReport {
     } else {
         true
     };
+    let balance = wrap_count;
     InvariantReport {
+        wrap_count_match_user_periods: wrap_count == user_periods_len,
+        wrap_count_match_wrap_periods: wrap_count == wrap_periods_len,
+        latest_period_matches_max: latest_period == max_user_period,
+        all_user_periods_live,
+        balance_matches_wrap_count: balance == wrap_count,
         wrap_count,
         user_periods_len,
         wrap_periods_len,
-        all_user_periods_live,
         latest_period,
         max_user_period,
         live_wraps_found,
-        balance: wrap_count as i128,
+        balance,
     }
 }

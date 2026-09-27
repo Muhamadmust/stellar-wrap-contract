@@ -1,6 +1,6 @@
 #[cfg(any(test, feature = "testutils"))]
 extern crate std;
-use soroban_sdk::{contracttype, Address, Bytes, BytesN, String, Symbol};
+use soroban_sdk::{contracttype, Address, Bytes, BytesN, String, Symbol, Vec};
 
 #[contracttype]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -44,7 +44,6 @@ impl WrapLifecycleFSM {
                 | (WrapState::Pending, WrapState::Bridged)
                 | (WrapState::Active, WrapState::Archived)
                 | (WrapState::Active, WrapState::Cancelled)
-                | (WrapState::Active, WrapState::Bridged)
         )
     }
 
@@ -86,6 +85,12 @@ pub struct WrapRecord {
 
     /// Current lifecycle state and its last update timestamp.
     pub fsm: WrapLifecycleFSM,
+
+    /// Optional description for the wrap metadata.
+    pub description: Option<String>,
+
+    /// Optional image URL for the wrap metadata.
+    pub image_url: Option<String>,
 }
 
 #[contracttype]
@@ -306,10 +311,6 @@ pub enum DataKey {
     StakeConfig,
     /// Total amount staked across all users (instance-level).
     TotalStaked,
-    /// Single relayer address that authorizes outbound bridge refunds
-    /// (`bridge_wrap_refund`). Kept alongside the per-chain relayer sets used
-    /// for inbound bridges.
-    BridgeRelayer,
 }
 
 #[contracttype]
